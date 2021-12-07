@@ -14,8 +14,8 @@ var ErrShortPathExists = fmt.Errorf("short path already exist")
 var ErrFailedSettingExpire = fmt.Errorf("failed setting expire")
 
 type Storage interface {
-	Save(ctx context.Context, shortPath string, item *models.UrlItem) error
-	Load(ctx context.Context, shortPath string) (*models.UrlItem, error)
+	Save(ctx context.Context, shortPath string, item *models.URL) error
+	Load(ctx context.Context, shortPath string) (*models.URL, error)
 }
 
 type storage struct {
@@ -28,8 +28,8 @@ func New(rdb *redis.Client) Storage {
 	}
 }
 
-func (s *storage) Save(ctx context.Context, shortPath string, item *models.UrlItem) error {
-	set, err := s.rdb.HSetNX(ctx, shortPath, "url", item.Url).Result()
+func (s *storage) Save(ctx context.Context, shortPath string, url *models.URL) error {
+	set, err := s.rdb.HSetNX(ctx, shortPath, "url", url.Url).Result()
 	if err != nil {
 		return ErrFailedSavingUrl
 	}
@@ -37,12 +37,12 @@ func (s *storage) Save(ctx context.Context, shortPath string, item *models.UrlIt
 		return ErrShortPathExists
 	}
 
-	err = s.rdb.HSetNX(ctx, shortPath, "expireAt", item.ExpireAt).Err()
+	err = s.rdb.HSetNX(ctx, shortPath, "expireAt", url.ExpireAt).Err()
 	if err != nil {
 		return fmt.Errorf("error setting expireAt: %w", ErrFailedSavingUrl)
 	}
-	if item.ExpireAt > 0 {
-		err = s.rdb.ExpireAt(ctx, shortPath, time.Unix(item.ExpireAt, 0)).Err()
+	if url.ExpireAt > 0 {
+		err = s.rdb.ExpireAt(ctx, shortPath, time.Unix(url.ExpireAt, 0)).Err()
 		if err != nil {
 			return ErrFailedSettingExpire
 		}
@@ -51,13 +51,13 @@ func (s *storage) Save(ctx context.Context, shortPath string, item *models.UrlIt
 	return nil
 }
 
-func (s *storage) Load(ctx context.Context, shortPath string) (*models.UrlItem, error) {
+func (s *storage) Load(ctx context.Context, shortPath string) (*models.URL, error) {
 	res := s.rdb.HGetAll(ctx, shortPath)
 	if res.Err() != nil {
 		return nil, fmt.Errorf("error loading from Redis: %w", ErrFailedLoadingUrl)
 	}
 
-	var item models.UrlItem
+	var item models.URL
 	if err := res.Scan(&item); err != nil {
 		return nil, fmt.Errorf("error scanning into UrlItem: %w", ErrFailedLoadingUrl)
 	}

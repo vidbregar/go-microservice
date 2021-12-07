@@ -1,7 +1,13 @@
 package main
 
 import (
+	"fmt"
+	"github.com/brpaz/echozap"
+	"github.com/deepmap/oapi-codegen/pkg/middleware"
+	"github.com/fvbock/endless"
+	"github.com/labstack/echo/v4"
 	"github.com/vidbregar/go-microservice/internal/api"
+	"github.com/vidbregar/go-microservice/internal/api/handlers"
 	"github.com/vidbregar/go-microservice/internal/config"
 	"github.com/vidbregar/go-microservice/internal/db/redis"
 	"github.com/vidbregar/go-microservice/internal/db/redis/urlshortener"
@@ -13,7 +19,7 @@ import (
 func main() {
 	conf := config.Config{
 		Server: config.Server{
-			":8080",
+			Address: ":8080",
 		},
 		Logger: config.Logger{
 			Development: true,
@@ -33,6 +39,21 @@ func main() {
 
 	gen := shortpath.New(time.Now().UnixNano())
 
-	server := api.New(urlDb, gen, logger)
-	server.ListenAndServe(conf.Server.Address)
+	swagger, err := api.GetSwagger()
+	if err != nil {
+		logger.Fatal(fmt.Sprintf("Error loading swagger spec\n: %s", err))
+	}
+
+	e := echo.New()
+	e.Use(echozap.ZapLogger(logger))
+	e.Use(middleware.OapiRequestValidator(swagger))
+
+	basePath := "v1"
+	api.RegisterHandlersWithBaseURL(e, handlers.NewUrlHandler(urlDb, gen, logger), basePath)
+
+	err = endless.ListenAndServe(conf.Server.Address, e)
+	if err != nil {
+		logger.Error(err.Error())
+	}
+	logger.Info(fmt.Sprintf("Stopped listening on %s", conf.Server.Address))
 }

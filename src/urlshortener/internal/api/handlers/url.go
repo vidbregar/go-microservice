@@ -2,111 +2,68 @@ package handlers
 
 import (
 	"errors"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
+	"github.com/vidbregar/go-microservice/internal/api"
 	"github.com/vidbregar/go-microservice/internal/db/models"
 	"github.com/vidbregar/go-microservice/internal/db/redis/urlshortener"
 	"github.com/vidbregar/go-microservice/pkg/shortpath"
 	"go.uber.org/zap"
 	"net/http"
-	"net/url"
 	"path"
 )
 
 const shortPathLen = 7
 
-type UrlHandler interface {
-	RedirectUrl(c *gin.Context)
-	CreateUrl(c *gin.Context)
-}
-
 type handler struct {
-	router *gin.RouterGroup
 	db     urlshortener.Storage
 	gen    shortpath.Generator
 	logger *zap.Logger
 }
 
-func NewUrlHandler(router *gin.RouterGroup, db urlshortener.Storage, gen shortpath.Generator, logger *zap.Logger) *handler {
-	h := handler{
-		router: router.Group("/url"),
+func NewUrlHandler(db urlshortener.Storage, gen shortpath.Generator, logger *zap.Logger) api.ServerInterface {
+	return &handler{
 		db:     db,
 		gen:    gen,
 		logger: logger,
 	}
-
-	h.router.GET("/:shortPath", h.RedirectUrl)
-	h.router.POST("/", h.CreateUrl)
-
-	return &h
 }
 
-func (h *handler) RedirectUrl(c *gin.Context) {
-	shortPath := c.Param("shortPath")
-
-	if !isValidShortPath(shortPath) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid short path"})
-		return
-	}
-
-	item, err := h.db.Load(c, shortPath)
-	if err != nil {
+func (h handler) PostUrl(ctx echo.Context) error {
+	var urlSwag api.URL
+	if err := ctx.Bind(&urlSwag); err != nil {
 		h.logger.Error(err.Error())
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-
-	if item != nil && item.Url != "" {
-		c.Redirect(http.StatusFound, item.Url)
-		return
-	}
-
-	c.Status(http.StatusNotFound)
-}
-
-func (h *handler) CreateUrl(c *gin.Context) {
-	var item models.UrlItem
-	if err := c.ShouldBindJSON(&item); err != nil {
-		h.logger.Error(err.Error())
-		c.Status(http.StatusBadRequest)
-		return
-	}
-
-	if !isValidUrlItem(&item) {
-		c.Status(http.StatusBadRequest)
-		return
+		return ctx.JSON(http.StatusBadRequest, api.ErrBadRequest)
 	}
 
 	var shortPath string
 	var err error
+	url := models.FromSwaggerURL(urlSwag)
 	for do := true; do; do = errors.Is(err, urlshortener.ErrShortPathExists) {
 		shortPath = h.gen.Generate(shortPathLen)
-		err = h.db.Save(c, shortPath, &item)
+		err = h.db.Save(ctx.Request().Context(), shortPath, &url)
 	}
 	if err != nil {
 		h.logger.Error(err.Error())
-		c.Status(http.StatusInternalServerError)
-		return
+		return err
 	}
 
-	// TODO: Create a model
-	shortUrl := path.Join(c.Request.Host, h.router.BasePath(), shortPath)
-
-	c.JSON(http.StatusCreated, gin.H{"shortUrl": shortUrl})
-}
-
-func isValidShortPath(shortPath string) bool {
-	return len(shortPath) == shortPathLen
-}
-
-func isValidUrlItem(item *models.UrlItem) bool {
-	if item == nil {
-		return false
+	shortened := api.ShortenedURL{
+		ShortUrl: path.Join(ctx.Request().Host, ctx.Path(), shortPath),
 	}
 
-	_, err := url.ParseRequestURI(item.Url)
+	return ctx.JSON(http.StatusCreated, shortened)
+}
+
+func (h handler) GetUrlShortened(ctx echo.Context, shortened string) error {
+	url, err := h.db.Load(ctx.Request().Context(), shortened)
 	if err != nil {
-		return false
+		h.logger.Error(err.Error())
+		return err
 	}
 
-	return true
+	if url != nil && url.Url != "" {
+		return ctx.Redirect(http.StatusFound, url.Url)
+	}
+
+	return ctx.JSON(http.StatusNotFound, api.ErrNotFound)
 }
