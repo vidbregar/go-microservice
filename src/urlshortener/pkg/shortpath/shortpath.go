@@ -3,7 +3,6 @@ package shortpath
 import (
 	"math/rand"
 	"strings"
-	"time"
 )
 
 var chars = []byte{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
@@ -16,8 +15,8 @@ type Generator interface {
 
 type generator struct{}
 
-func New() Generator {
-	rand.Seed(time.Now().UnixNano())
+func New(seed int64) Generator {
+	rand.Seed(seed)
 
 	return &generator{}
 }
