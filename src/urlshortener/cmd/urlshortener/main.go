@@ -25,7 +25,7 @@ func main() {
 			Development: true,
 		},
 		Redis: config.Redis{
-			Host:    "127.0.0.1",
+			Host:    "redis",
 			Port:    "6379",
 			Retries: 5,
 		},

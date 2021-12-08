@@ -11,3 +11,9 @@ generate: ## Generate Go server and types from OpenAPI spec
 
 run: ## Start dev urlshortener microservice
 	go run cmd/urlshortener/main.go
+
+build/%: ## Build microservice
+	CGO_ENABLED=0 go build \
+		-mod=vendor \
+		-o build/$* \
+		cmd/$*/main.go
