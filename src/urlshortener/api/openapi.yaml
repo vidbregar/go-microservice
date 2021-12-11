@@ -47,6 +47,17 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
+  /version:
+    get:
+      summary: Returns microservice version information
+      responses:
+        '200':
+          description: Version
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Version'
+
 components:
   responses:
     NotFound:
@@ -98,3 +109,14 @@ components:
         shortUrl:
           type: string
           format: uri
+
+    Version:
+      type: object
+      required:
+        - revision
+        - version
+      properties:
+        revision:
+          type: string
+        version:
+          type: string

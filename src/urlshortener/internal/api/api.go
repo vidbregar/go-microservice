@@ -1,16 +1,18 @@
 package api
 
 import (
-	"net/http"
-	"strconv"
+	"github.com/vidbregar/go-microservice/internal/api/oapi"
+	v1 "github.com/vidbregar/go-microservice/internal/api/v1"
 )
 
-var ErrBadRequest = BadRequest{
-	Code:    strconv.Itoa(http.StatusBadRequest),
-	Message: "Request was badly formatted",
+type server struct {
+	v1.UrlHandler
+	v1.VersionHandler
 }
 
-var ErrNotFound = NotFound{
-	Code:    strconv.Itoa(http.StatusNotFound),
-	Message: "Requested resource was not found",
+func NewServer(urlHandlerV1 v1.UrlHandler, versionHandlerV1 v1.VersionHandler) oapi.ServerInterface {
+	return &server{
+		urlHandlerV1,
+		versionHandlerV1,
+	}
 }

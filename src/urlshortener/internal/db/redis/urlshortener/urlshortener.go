@@ -3,9 +3,10 @@ package urlshortener
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/go-redis/redis/v8"
 	"github.com/vidbregar/go-microservice/internal/db/models"
-	"time"
 )
 
 var ErrFailedSavingUrl = fmt.Errorf("failed saving url")

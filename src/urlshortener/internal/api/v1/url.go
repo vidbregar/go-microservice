@@ -1,38 +1,44 @@
-package handlers
+package v1
 
 import (
 	"errors"
+	"net/http"
+	"path"
+
 	"github.com/labstack/echo/v4"
-	"github.com/vidbregar/go-microservice/internal/api"
+	"github.com/vidbregar/go-microservice/internal/api/oapi"
 	"github.com/vidbregar/go-microservice/internal/db/models"
 	"github.com/vidbregar/go-microservice/internal/db/redis/urlshortener"
 	"github.com/vidbregar/go-microservice/pkg/shortpath"
 	"go.uber.org/zap"
-	"net/http"
-	"path"
 )
 
 const shortPathLen = 7
 
-type handler struct {
+type UrlHandler interface {
+	PostUrl(ctx echo.Context) error
+	GetUrlShortened(ctx echo.Context, shortened string) error
+}
+
+type urlHandler struct {
 	db     urlshortener.Storage
 	gen    shortpath.Generator
 	logger *zap.Logger
 }
 
-func NewUrlHandler(db urlshortener.Storage, gen shortpath.Generator, logger *zap.Logger) api.ServerInterface {
-	return &handler{
+func NewUrlHandler(db urlshortener.Storage, gen shortpath.Generator, logger *zap.Logger) UrlHandler {
+	return &urlHandler{
 		db:     db,
 		gen:    gen,
 		logger: logger,
 	}
 }
 
-func (h handler) PostUrl(ctx echo.Context) error {
-	var urlSwag api.URL
+func (h urlHandler) PostUrl(ctx echo.Context) error {
+	var urlSwag oapi.URL
 	if err := ctx.Bind(&urlSwag); err != nil {
 		h.logger.Error(err.Error())
-		return ctx.JSON(http.StatusBadRequest, api.ErrBadRequest)
+		return ctx.JSON(http.StatusBadRequest, ErrBadRequest)
 	}
 
 	var shortPath string
@@ -47,14 +53,14 @@ func (h handler) PostUrl(ctx echo.Context) error {
 		return err
 	}
 
-	shortened := api.ShortenedURL{
+	shortened := oapi.ShortenedURL{
 		ShortUrl: path.Join(ctx.Request().Host, ctx.Path(), shortPath),
 	}
 
 	return ctx.JSON(http.StatusCreated, shortened)
 }
 
-func (h handler) GetUrlShortened(ctx echo.Context, shortened string) error {
+func (h urlHandler) GetUrlShortened(ctx echo.Context, shortened string) error {
 	url, err := h.db.Load(ctx.Request().Context(), shortened)
 	if err != nil {
 		h.logger.Error(err.Error())
@@ -65,5 +71,5 @@ func (h handler) GetUrlShortened(ctx echo.Context, shortened string) error {
 		return ctx.Redirect(http.StatusFound, url.Url)
 	}
 
-	return ctx.JSON(http.StatusNotFound, api.ErrNotFound)
+	return ctx.JSON(http.StatusNotFound, ErrNotFound)
 }
