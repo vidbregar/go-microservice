@@ -1,7 +1,12 @@
 version: "3.9"
 services:
   urlshortener:
-    build: src/urlshortener
+    build:
+      context: src/urlshortener
+      args:
+        GIT_TAG: dev
+    depends_on:
+      - redis
     ports:
       - "8080:8080"
   redis:

@@ -16,6 +16,7 @@ run: ## Start urlshortener in Docker
 	docker run -p 8080:8080 --name urlshortener urlshortener:latest
 
 build: ## Builds urlshortener image
+	docker image rm urlshortener:latest || true
 	docker build --build-arg REVISION=$(REVISION) \
 				 --build-arg GIT_TAG=$(GIT_TAG) \
 				 -t urlshortener:latest .

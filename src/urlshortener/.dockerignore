@@ -1,0 +1,10 @@
+# Ignore all
+*
+
+# Except
+!cmd
+!internal
+!pkg
+!vendor
+!go.mod
+!go.sum
