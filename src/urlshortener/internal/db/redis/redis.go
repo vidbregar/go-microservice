@@ -12,8 +12,8 @@ import (
 func New(conf config.Redis, logger *zap.Logger) *redis.Client {
 	client := redis.NewClient(&redis.Options{
 		Addr:       fmt.Sprintf("%s:%s", conf.Host, conf.Port),
-		Username:   "",
-		Password:   "",
+		Username:   conf.Username,
+		Password:   conf.Password,
 		DB:         0,
 		MaxRetries: conf.Retries,
 	})

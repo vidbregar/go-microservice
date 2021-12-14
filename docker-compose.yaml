@@ -5,9 +5,16 @@ services:
       context: src/urlshortener
       args:
         GIT_TAG: dev
+    environment:
+      - REDIS_PASSWORD=redis_password
+    volumes:
+      - ./config/urlshortener/config.yaml:/etc/config.yaml
     depends_on:
       - redis
     ports:
       - "8080:8080"
   redis:
     image: "redis:6.2.6"
+    command: redis-server --requirepass redis_password
+    volumes:
+      - ./config/redis/redis.conf:/usr/local/etc/redis/redis.conf

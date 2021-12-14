@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"time"
 
@@ -19,18 +20,11 @@ import (
 )
 
 func main() {
-	conf := config.Config{
-		Server: config.Server{
-			Address: ":8080",
-		},
-		Logger: config.Logger{
-			Development: true,
-		},
-		Redis: config.Redis{
-			Host:    "redis",
-			Port:    "6379",
-			Retries: 5,
-		},
+	configFile := flag.String("config", "config.yaml", "path to config yaml file")
+	flag.Parse()
+	conf, err := config.New(*configFile)
+	if err != nil {
+		panic(err)
 	}
 
 	logger := loggerpkg.New(&conf.Logger)
