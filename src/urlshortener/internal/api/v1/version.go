@@ -9,7 +9,7 @@ import (
 )
 
 type VersionHandler interface {
-	GetVersion(ctx echo.Context) error
+	GetV1Version(ctx echo.Context) error
 }
 
 type versionHandler struct{}
@@ -18,7 +18,7 @@ func NewVersionHandler() VersionHandler {
 	return &versionHandler{}
 }
 
-func (h *versionHandler) GetVersion(ctx echo.Context) error {
+func (h *versionHandler) GetV1Version(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, oapi.Version{
 		Revision: version.Revision,
 		Version:  version.GitTag,

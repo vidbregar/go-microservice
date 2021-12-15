@@ -9,6 +9,11 @@ type Error struct {
 	Message string `json:"message"`
 }
 
+// Health defines model for Health.
+type Health struct {
+	Status string `json:"status"`
+}
+
 // ShortenedURL defines model for ShortenedURL.
 type ShortenedURL struct {
 	ShortUrl string `json:"shortUrl"`
@@ -32,9 +37,9 @@ type BadRequest Error
 // NotFound defines model for NotFound.
 type NotFound Error
 
-// PostUrlJSONBody defines parameters for PostUrl.
-type PostUrlJSONBody URL
+// PostV1UrlJSONBody defines parameters for PostV1Url.
+type PostV1UrlJSONBody URL
 
-// PostUrlJSONRequestBody defines body for PostUrl for application/json ContentType.
-type PostUrlJSONRequestBody PostUrlJSONBody
+// PostV1UrlJSONRequestBody defines body for PostV1Url for application/json ContentType.
+type PostV1UrlJSONRequestBody PostV1UrlJSONBody
 

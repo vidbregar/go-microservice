@@ -20,15 +20,21 @@ import (
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// Checks liveness
+	// (GET /livez)
+	GetLivez(ctx echo.Context) error
+	// Checks readiness
+	// (GET /readyz)
+	GetReadyz(ctx echo.Context) error
 	// Creates a new shortened URL
-	// (POST /url)
-	PostUrl(ctx echo.Context) error
+	// (POST /v1/url)
+	PostV1Url(ctx echo.Context) error
 	// Redirects to URL that was shortened
-	// (GET /url/{shortened})
-	GetUrlShortened(ctx echo.Context, shortened string) error
+	// (GET /v1/url/{shortened})
+	GetV1UrlShortened(ctx echo.Context, shortened string) error
 	// Returns microservice version information
-	// (GET /version)
-	GetVersion(ctx echo.Context) error
+	// (GET /v1/version)
+	GetV1Version(ctx echo.Context) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -36,17 +42,35 @@ type ServerInterfaceWrapper struct {
 	Handler ServerInterface
 }
 
-// PostUrl converts echo context to params.
-func (w *ServerInterfaceWrapper) PostUrl(ctx echo.Context) error {
+// GetLivez converts echo context to params.
+func (w *ServerInterfaceWrapper) GetLivez(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshalled arguments
-	err = w.Handler.PostUrl(ctx)
+	err = w.Handler.GetLivez(ctx)
 	return err
 }
 
-// GetUrlShortened converts echo context to params.
-func (w *ServerInterfaceWrapper) GetUrlShortened(ctx echo.Context) error {
+// GetReadyz converts echo context to params.
+func (w *ServerInterfaceWrapper) GetReadyz(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.GetReadyz(ctx)
+	return err
+}
+
+// PostV1Url converts echo context to params.
+func (w *ServerInterfaceWrapper) PostV1Url(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.PostV1Url(ctx)
+	return err
+}
+
+// GetV1UrlShortened converts echo context to params.
+func (w *ServerInterfaceWrapper) GetV1UrlShortened(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "shortened" -------------
 	var shortened string
@@ -57,16 +81,16 @@ func (w *ServerInterfaceWrapper) GetUrlShortened(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshalled arguments
-	err = w.Handler.GetUrlShortened(ctx, shortened)
+	err = w.Handler.GetV1UrlShortened(ctx, shortened)
 	return err
 }
 
-// GetVersion converts echo context to params.
-func (w *ServerInterfaceWrapper) GetVersion(ctx echo.Context) error {
+// GetV1Version converts echo context to params.
+func (w *ServerInterfaceWrapper) GetV1Version(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshalled arguments
-	err = w.Handler.GetVersion(ctx)
+	err = w.Handler.GetV1Version(ctx)
 	return err
 }
 
@@ -98,28 +122,31 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
-	router.POST(baseURL+"/url", wrapper.PostUrl)
-	router.GET(baseURL+"/url/:shortened", wrapper.GetUrlShortened)
-	router.GET(baseURL+"/version", wrapper.GetVersion)
+	router.GET(baseURL+"/livez", wrapper.GetLivez)
+	router.GET(baseURL+"/readyz", wrapper.GetReadyz)
+	router.POST(baseURL+"/v1/url", wrapper.PostV1Url)
+	router.GET(baseURL+"/v1/url/:shortened", wrapper.GetV1UrlShortened)
+	router.GET(baseURL+"/v1/version", wrapper.GetV1Version)
 
 }
 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/7xV32/bOAz+VwTePdwBRuz+wB3gt3bYhgJdV2TLMKDog2oxiYpYUik5bRD4fx8oO47d",
-	"uC0wFHuKJVIfP5IfmS0UtnTWoAke8i0QemeNx3g4l2qKDxX6wKfCmoAmfkrnVrqQQVuT3ntr+M4XSywl",
-	"f/1NOIcc/kr30Glj9elHIktQ13UCCn1B2jEI5PB9icI7LPRcoxLUhBWP0os7qVYbMbdUyhBQQZ3AlQ2f",
-	"bGXUn6flbUUFRl7GBjGPLPhZi8SBGrB8C/gkS7fChqVCyGFm9EOFAtlDxLsESvReLtgaH4rduU7AkXVI",
-	"QTftaDC2EDaOvX0gbRbs1iEc2OoEuJSaUEF+A88i3iY7f3t3j0VgrG9LSwENqtn0kgGHFDxbZ7Ti76Yj",
-	"kENFGpI3IncPx2KOhsInpwnPwiCUNuG/030wbQIukBij+g1S1Qt8fiB53chnyIlwrXeWgy6s969eD9uh",
-	"7N8csuBH2sxthNNhFdUzvRS+7Q+Js+uLHkIO2eRokjER69BIpyGHk0k2ySABJ8MyJpC2ZXK2mWlOLs7L",
-	"hYIcrq2PPWroog/nVm3ebca4yyMTxkkFK+6wS02JRx2WQhpho5NciSiGjZhdXfwUQZfogywd9MsaqMJY",
-	"597+Os6O3o39YC5G0ujsghMqCGW7q06z7CXsjmza27RxmVRlKWkDOXyIQF5IYfCxV6GGRRIbmm67+5pD",
-	"LXCkt5+RW9uxjKIgWWJA8pDfbF9LB1iKkEcZQQJGllHdPaxhH5JeTUv5dIlmEZaQ/59AqU3v9HxMbp/1",
-	"7yQ75p8hsykqTVgEVCybWAcu8unbRe7+NYYl3gH6Fk+EpWz+efYZxlL3BvylEu82x4EQs3cT4i7EiAb3",
-	"pmF+oSLjRakLsh5prQsUbS6CVwxvzA6RHcYl8XU3jI2L6FkTgZPFRHyR2oh/HFlVFXz9b+sK7XqGdH0E",
-	"9W39KwAA//+U+016dQgAAA==",
+	"H4sIAAAAAAAC/8RW227jNhD9FWLaR8Gyd4MW0Ntu0UsAYxE4dVAgyAMjjS2mEsmQIyeuoX8vhrpYshUH",
+	"KNL2yZJneOacuVEHSE1pjUZNHpIDOPTWaI/h5avMVvhcoSd+S40m1OFRWluoVJIyOn7yRvN/Ps2xlPz0",
+	"vcMNJPBdfISOG6uPf3bOOKjrOoIMfeqUZRBI4PcchbeYqo3CTLgmrHiRXjzKrNiLjXGlJMIM6gi+GfrF",
+	"VDr772l5U7kUAy9tSGwCCz7WInGgBiw5AL7K0hbYsMwQElhr9VyhQPYQ4b8ISvRebtkaDoruvY7AOmPR",
+	"kWrK0WAcgPaWvT05pbfs1iOc2eoIOJXKYQbJPZxEfIg6f/P4hCkx1m8oC8oZahzck6TKvx+i9ZuCvs2N",
+	"I9SYrVfLiQBsXbuCn5tiQwKVUxC9F7E7OBVzMhS+WuXwC41CKU0/XB2DKU24RccY1T8gVb3B5w6dV01n",
+	"jjk53KnOclbg3fHU5bA9yvHMOQs+pPTGBDhFRWjM1VL4tj5OfLm5HiAkMJ8tZnMmYixqaRUk8Hk2n80h",
+	"AispDwLiQu3wL37aYsgsqwuzeJ1BAr8iLYNDNN4xn+bzD5vitncnxvgW3U6lKJQXknk2I1uVpXR7SOCn",
+	"HNM/vWCLRu+DNXYos/1FQavG4/9WFIhOK2KTOkraLeK2ma3xE5pujKe7Bc9S01bo6avJ9h8mh6dxQgs3",
+	"HxnxiH0LZuJFUS6kFiY4yUKEod2L9bfrPwSpEj3J0sKw/clVWJ8VY/Fh7Ef7a6okPXkWlDqU7XV11XTE",
+	"FHZPNh5ctielDEBeSKHxZZChhkVf1fjQm+pLTRvq21MNE+xkiYTOQ3J/uKQJeG9AEmYeItCyDKtogDUu",
+	"RjRIbClfl6i3fLX8GEGp9ODtdKc9nBTx8/wT/4yZrTBTDlPCjHsnJIMzffV+pvuvh3GeO0Df4gnKZfMF",
+	"clTY5XuwkN/Oc7fr/8X90IWY6MajaSySKqe9KFXqjG93SKtG8KXAd1yPyA5dX4TFATHUD/XfAQAA//9p",
+	"UZDSNQoAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

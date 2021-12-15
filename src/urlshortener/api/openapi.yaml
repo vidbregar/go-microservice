@@ -5,11 +5,10 @@ info:
   version: 0.1.0
 
 servers:
-  - url: /v1
-    description: Optional server description, e.g. Main (production) server
+  - url: /
 
 paths:
-  /url/{shortened}:
+  /v1/url/{shortened}:
     get:
       summary: Redirects to URL that was shortened
       parameters:
@@ -27,7 +26,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /url:
+  /v1/url:
     post:
       summary: Creates a new shortened URL
       requestBody:
@@ -47,7 +46,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /version:
+  /v1/version:
     get:
       summary: Returns microservice version information
       responses:
@@ -57,6 +56,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Version'
+
+  /livez:
+    get:
+      summary: Checks liveness
+      responses:
+        '200':
+          description: Service is alive
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+
+  /readyz:
+    get:
+      summary: Checks readiness
+      responses:
+        '200':
+          description: Service is ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
 
 components:
   responses:
@@ -119,4 +140,12 @@ components:
         revision:
           type: string
         version:
+          type: string
+
+    Health:
+      type: object
+      required:
+        - status
+      properties:
+        status:
           type: string

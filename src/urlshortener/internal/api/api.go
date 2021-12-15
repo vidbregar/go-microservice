@@ -6,12 +6,18 @@ import (
 )
 
 type server struct {
+	HealthHandler
 	v1.UrlHandler
 	v1.VersionHandler
 }
 
-func NewServer(urlHandlerV1 v1.UrlHandler, versionHandlerV1 v1.VersionHandler) oapi.ServerInterface {
+func NewServer(
+	healthHandler HealthHandler,
+	urlHandlerV1 v1.UrlHandler,
+	versionHandlerV1 v1.VersionHandler,
+) oapi.ServerInterface {
 	return &server{
+		healthHandler,
 		urlHandlerV1,
 		versionHandlerV1,
 	}

@@ -44,14 +44,14 @@ func main() {
 	e.Use(echozap.ZapLogger(logger))
 	e.Use(middleware.OapiRequestValidator(swagger))
 
-	basePath := "v1"
-	oapi.RegisterHandlersWithBaseURL(
+	oapi.RegisterHandlers(
 		e,
 		api.NewServer(
+			api.NewHealthHandler(rdb),
 			v1.NewUrlHandler(urlDb, gen, logger),
 			v1.NewVersionHandler(),
 		),
-		basePath)
+	)
 
 	err = endless.ListenAndServe(conf.Server.Address, e)
 	if err != nil {

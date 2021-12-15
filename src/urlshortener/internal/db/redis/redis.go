@@ -10,7 +10,7 @@ import (
 )
 
 func New(conf config.Redis, logger *zap.Logger) *redis.Client {
-	client := redis.NewClient(&redis.Options{
+	rdb := redis.NewClient(&redis.Options{
 		Addr:       fmt.Sprintf("%s:%s", conf.Host, conf.Port),
 		Username:   conf.Username,
 		Password:   conf.Password,
@@ -19,10 +19,10 @@ func New(conf config.Redis, logger *zap.Logger) *redis.Client {
 	})
 
 	ctx := context.Background()
-	_, err := client.Ping(ctx).Result()
+	_, err := rdb.Ping(ctx).Result()
 	if err != nil {
 		logger.Fatal(fmt.Sprintf("Unable to connect to %s:%s", conf.Host, conf.Port))
 	}
 
-	return client
+	return rdb
 }

@@ -16,8 +16,8 @@ import (
 const shortPathLen = 7
 
 type UrlHandler interface {
-	PostUrl(ctx echo.Context) error
-	GetUrlShortened(ctx echo.Context, shortened string) error
+	PostV1Url(ctx echo.Context) error
+	GetV1UrlShortened(ctx echo.Context, shortened string) error
 }
 
 type urlHandler struct {
@@ -34,7 +34,7 @@ func NewUrlHandler(db urlshortener.Storage, gen shortpath.Generator, logger *zap
 	}
 }
 
-func (h urlHandler) PostUrl(ctx echo.Context) error {
+func (h *urlHandler) PostV1Url(ctx echo.Context) error {
 	var urlSwag oapi.URL
 	if err := ctx.Bind(&urlSwag); err != nil {
 		h.logger.Error(err.Error())
@@ -60,7 +60,7 @@ func (h urlHandler) PostUrl(ctx echo.Context) error {
 	return ctx.JSON(http.StatusCreated, shortened)
 }
 
-func (h urlHandler) GetUrlShortened(ctx echo.Context, shortened string) error {
+func (h *urlHandler) GetV1UrlShortened(ctx echo.Context, shortened string) error {
 	url, err := h.db.Load(ctx.Request().Context(), shortened)
 	if err != nil {
 		h.logger.Error(err.Error())
