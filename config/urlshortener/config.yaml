@@ -5,5 +5,7 @@ logger:
 redis:
   host: "redis"
   port: "6379"
-  retries: 5
+  retries: 6
+  minRetryBackoff: 1000
+  maxRetryBackoff: 32000
   username: default

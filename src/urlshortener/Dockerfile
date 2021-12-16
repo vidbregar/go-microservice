@@ -30,4 +30,4 @@ USER nonroot:nonroot
 
 COPY --from=builder --chown=nonroot:nonroot /app/build/urlshortener /bin/urlshortener
 
-CMD [ "/bin/urlshortener", "-config", "/etc/config.yaml"]
+CMD [ "/bin/urlshortener", "-config", "/etc/app/config.yaml"]

@@ -31,11 +31,13 @@ type Logger struct {
 }
 
 type Redis struct {
-	Host     string `mapstructure:"HOST" json:"host"`
-	Port     string `mapstructure:"PORT" json:"port"`
-	Retries  int    `mapstructure:"RETRIES" json:"retries"`
-	Username string `mapstructure:"USERNAME" json:"username"`
-	Password string `mapstructure:"PASSWORD" json:"password"`
+	Host            string `mapstructure:"HOST" yaml:"host"`
+	Port            string `mapstructure:"PORT" yaml:"port"`
+	Username        string `mapstructure:"USERNAME" yaml:"username"`
+	Password        string `mapstructure:"PASSWORD" yaml:"password"`
+	Retries         int    `mapstructure:"RETRIES" yaml:"retries"`
+	MinRetryBackoff int    `mapstructure:"MINRETRYBACKOFF" yaml:"minRetryBackoff"`
+	MaxRetryBackoff int    `mapstructure:"MAXRETRYBACKOFF" yaml:"maxRetryBackoff"`
 }
 
 func defaultConfig() *Config {

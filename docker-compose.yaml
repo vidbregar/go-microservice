@@ -8,7 +8,7 @@ services:
     environment:
       - REDIS_PASSWORD=redis_password
     volumes:
-      - ./config/urlshortener/config.yaml:/etc/config.yaml
+      - ./config/urlshortener/config.yaml:/etc/app/config.yaml
     depends_on:
       - redis
     ports:
