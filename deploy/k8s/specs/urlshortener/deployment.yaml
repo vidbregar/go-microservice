@@ -18,12 +18,29 @@ spec:
         - name: urlshortener
           image: k3d-registry.localhost:50000/urlshortener:latest
           ports:
-            - containerPort: 8080
+            - name: service-port
+              containerPort: 8080
+              hostPort: 8080
           env:
             - name: REDIS_HOST
               value: redis-service
             - name: REDIS_PORT
               value: "6379"
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8080
+            initialDelaySeconds: 5
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: 8080
+            initialDelaySeconds: 15
+          lifecycle:
+            preStop:
+              exec:
+                command: [ "/bin/nap", "5" ]
           volumeMounts:
             - name: config
               mountPath: "/etc/app/"

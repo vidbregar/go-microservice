@@ -21,13 +21,19 @@ RUN CGO_ENABLED=0 go build \
   -a -o build/urlshortener \
   ./cmd/urlshortener
 
+RUN CGO_ENABLED=0 go build \
+    -ldflags "-s -w" \
+    -a -o build/nap \
+    ./cmd/nap
+
 ############################
 # FINAL
 ############################
-FROM gcr.io/distroless/static
+FROM gcr.io/distroless/static@sha256:8ad6f3ec70dad966479b9fb48da991138c72ba969859098ec689d1450c2e6c97
 
 USER nonroot:nonroot
 
 COPY --from=builder --chown=nonroot:nonroot /app/build/urlshortener /bin/urlshortener
+COPY --from=builder --chown=nonroot:nonroot /app/build/nap /bin/nap
 
-CMD [ "/bin/urlshortener", "-config", "/etc/app/config.yaml"]
+CMD [ "/bin/urlshortener", "-config", "/etc/app/config.yaml" ]
