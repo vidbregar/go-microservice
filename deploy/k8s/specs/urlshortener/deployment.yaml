@@ -5,7 +5,7 @@ metadata:
   labels:
     app: urlshortener
 spec:
-  replicas: 1
+  replicas: 8
   selector:
     matchLabels:
       app: urlshortener
@@ -20,7 +20,6 @@ spec:
           ports:
             - name: service-port
               containerPort: 8080
-              hostPort: 8080
           env:
             - name: REDIS_HOST
               value: redis-service

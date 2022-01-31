@@ -1,6 +1,7 @@
 apiVersion: k3d.io/v1alpha3
 kind: Simple
 name: dev
+agents: 3
 ports:
   - port: 8080:80
     nodeFilters:
