@@ -16,7 +16,9 @@ run: ## Start urlshortener in Docker
 	docker run -p 8080:8080 --name urlshortener urlshortener:latest
 
 build: ## Builds urlshortener image
-	docker image rm urlshortener:latest || true
+	docker image rm k3d-registry.localhost:50000/urlshortener:latest || true
 	docker build --build-arg REVISION=$(REVISION) \
 				 --build-arg GIT_TAG=$(GIT_TAG) \
-				 -t urlshortener:latest .
+				 -t k3d-registry.localhost:50000/urlshortener:latest .
+push: ## Pushes urlshortener image to k3d registry
+	docker push k3d-registry.localhost:50000/urlshortener:latest

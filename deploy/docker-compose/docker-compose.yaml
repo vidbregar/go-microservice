@@ -2,7 +2,7 @@ version: "3.9"
 services:
   urlshortener:
     build:
-      context: src/urlshortener
+      context: ../../src/urlshortener
       args:
         GIT_TAG: dev
     environment:

@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: urlshortener-deployment
+  labels:
+    app: urlshortener
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: urlshortener
+  template:
+    metadata:
+      labels:
+        app: urlshortener
+    spec:
+      containers:
+        - name: urlshortener
+          image: k3d-registry.localhost:50000/urlshortener:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: REDIS_HOST
+              value: redis-service
+            - name: REDIS_PORT
+              value: "6379"
+          volumeMounts:
+            - name: config
+              mountPath: "/etc/app/"
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: urlshortener-config
