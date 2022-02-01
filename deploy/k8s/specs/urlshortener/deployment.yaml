@@ -40,6 +40,12 @@ spec:
             preStop:
               exec:
                 command: [ "/bin/nap", "5" ]
+          resources:
+            requests:
+              memory: 14Mi
+              cpu: 240m
+            limits:
+              memory: 28Mi
           volumeMounts:
             - name: config
               mountPath: "/etc/app/"
