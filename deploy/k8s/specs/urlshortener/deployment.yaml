@@ -2,10 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: urlshortener-deployment
-  labels:
-    app: urlshortener
 spec:
-  replicas: 8
+  replicas: 3
   selector:
     matchLabels:
       app: urlshortener
@@ -22,19 +20,19 @@ spec:
               containerPort: 8080
           env:
             - name: REDIS_HOST
-              value: redis-service
+              value: redis-svc
             - name: REDIS_PORT
               value: "6379"
           readinessProbe:
             httpGet:
               path: /readyz
-              port: 8080
+              port: service-port
             initialDelaySeconds: 5
             timeoutSeconds: 3
           livenessProbe:
             httpGet:
               path: /livez
-              port: 8080
+              port: service-port
             initialDelaySeconds: 15
           lifecycle:
             preStop:
@@ -53,4 +51,4 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: urlshortener-config
+            name: urlshortener-cm

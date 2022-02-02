@@ -2,6 +2,7 @@ apiVersion: k3d.io/v1alpha3
 kind: Simple
 name: dev
 agents: 3
+image: rancher/k3s:v1.23.3-k3s1
 ports:
   - port: 8080:80
     nodeFilters:

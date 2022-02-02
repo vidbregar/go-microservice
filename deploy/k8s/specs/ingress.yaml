@@ -12,6 +12,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: urlshortener-service
+                name: urlshortener-svc
                 port:
                   number: 8080
