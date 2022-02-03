@@ -50,5 +50,15 @@ spec:
               readOnly: true
       volumes:
         - name: config
-          configMap:
-            name: urlshortener-cm
+          projected:
+            sources:
+              - secret:
+                  name: urlshortener-secret
+                  items:
+                    - key: redis.yaml
+                      path: secrets/redis.yaml
+              - configMap:
+                  name: urlshortener-cm
+                  items:
+                    - key: config.yaml
+                      path: config.yaml

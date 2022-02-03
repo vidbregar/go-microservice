@@ -21,8 +21,9 @@ import (
 
 func main() {
 	configFile := flag.String("config", "config.yaml", "path to config yaml file")
+	secretsDir := flag.String("secrets", "/secrets/", "path to secrets directory")
 	flag.Parse()
-	conf, err := config.New(*configFile)
+	conf, err := config.New(*configFile, *secretsDir)
 	if err != nil {
 		panic(err)
 	}

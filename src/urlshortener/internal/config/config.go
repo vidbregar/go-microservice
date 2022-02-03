@@ -1,7 +1,9 @@
-// Package config includes configuration structs and New function for reading provided config
+// Package config includes configuration structs and New function
+// for reading provided configFile yaml and secrets yaml located in secretsDir
 //
 // Precedence order. Each item takes precedence over the item below it:
 // 	- env variables
+// 	- secrets yaml
 // 	- config yaml
 // 	- default
 //
@@ -10,6 +12,9 @@ package config
 
 import (
 	"bytes"
+	"fmt"
+	"io/ioutil"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -44,16 +49,16 @@ func defaultConfig() *Config {
 	return &Config{}
 }
 
-func New(configFile string) (*Config, error) {
+func New(configFile string, secretsDir string) (*Config, error) {
 	v := viper.New()
 
-	b, err := yaml.Marshal(defaultConfig())
+	configBytes, err := yaml.Marshal(defaultConfig())
 	if err != nil {
 		return nil, err
 	}
 
 	// set defaults
-	confReader := bytes.NewReader(b)
+	confReader := bytes.NewReader(configBytes)
 	v.SetConfigType("yaml")
 	if err := v.MergeConfig(confReader); err != nil {
 		return nil, err
@@ -64,6 +69,26 @@ func New(configFile string) (*Config, error) {
 	if err := v.MergeInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigParseError); ok {
 			return nil, err
+		}
+	}
+
+	// add secrets from all secrets yamls
+	secrets, err := ioutil.ReadDir(secretsDir)
+	if err != nil || len(secrets) == 0 {
+		fmt.Printf("No secrets found in %s\n", secretsDir)
+	}
+
+	for _, secret := range secrets {
+		if !secret.IsDir() {
+			secretBytes, err := ioutil.ReadFile(filepath.Join(secretsDir, secret.Name()))
+			if err != nil {
+				return nil, err
+			}
+
+			err = v.MergeConfig(bytes.NewBuffer(secretBytes))
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 

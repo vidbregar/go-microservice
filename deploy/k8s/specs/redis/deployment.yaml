@@ -15,6 +15,17 @@ spec:
       containers:
         - name: redis
           image: redis:6.2.6
+          command:
+            - redis-server
+          args:
+            - --requirepass
+            - $(REDIS_PASSWORD)
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: password
           resources:
             requests:
               cpu: 100m

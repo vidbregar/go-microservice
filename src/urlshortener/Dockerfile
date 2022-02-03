@@ -36,4 +36,4 @@ USER nonroot:nonroot
 COPY --from=builder --chown=nonroot:nonroot /app/build/urlshortener /bin/urlshortener
 COPY --from=builder --chown=nonroot:nonroot /app/build/nap /bin/nap
 
-CMD [ "/bin/urlshortener", "-config", "/etc/app/config.yaml" ]
+CMD [ "/bin/urlshortener", "-config", "/etc/app/config.yaml", "-secrets", "/etc/app/secrets/" ]

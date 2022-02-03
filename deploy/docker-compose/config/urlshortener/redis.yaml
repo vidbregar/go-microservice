@@ -1,0 +1,3 @@
+redis:
+  username: default
+  password: test-redis-password

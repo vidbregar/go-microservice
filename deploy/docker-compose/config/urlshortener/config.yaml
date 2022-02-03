@@ -8,4 +8,3 @@ redis:
   retries: 6
   minRetryBackoff: 1000
   maxRetryBackoff: 32000
-  username: default
