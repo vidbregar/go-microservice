@@ -9,6 +9,8 @@ data:
     logger:
       development: false
     redis:
+      host: "redis-svc"
+      port: "6379"
       retries: 6
       minRetryBackoff: 1000
       maxRetryBackoff: 32000

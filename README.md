@@ -50,4 +50,5 @@ Wait for the deployment to complete
 
 ``` bash
 curl localhost:8080/v1/version
+curl -X POST -H "Content-Type: application/json" -d '{"url":"https://kubernetes.io/docs/concepts/overview/what-is-kubernetes/"}' localhost:8080/v1/url
 ```
