@@ -28,7 +28,8 @@ type Config struct {
 }
 
 type Server struct {
-	Address string `mapstructure:"ADDRESS" yaml:"address"`
+	Address      string `mapstructure:"ADDRESS" yaml:"address"`
+	DelaySigterm int    `mapstructure:"DELAYSIGTERM" yaml:"delaySigterm`
 }
 
 type Logger struct {

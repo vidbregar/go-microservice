@@ -1,13 +1,17 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/brpaz/echozap"
 	"github.com/deepmap/oapi-codegen/pkg/middleware"
-	"github.com/fvbock/endless"
 	"github.com/labstack/echo/v4"
 	"github.com/vidbregar/go-microservice/internal/api"
 	"github.com/vidbregar/go-microservice/internal/api/oapi"
@@ -54,9 +58,24 @@ func main() {
 		),
 	)
 
-	err = endless.ListenAndServe(conf.Server.Address, e)
-	if err != nil {
-		logger.Error(err.Error())
+	go func() {
+		if err := e.Start(conf.Server.Address); err != nil && err != http.ErrServerClosed {
+			logger.Fatal("shutting down the server")
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+	s := <-quit
+
+	if conf.Server.DelaySigterm > 0 && s == syscall.SIGTERM {
+		logger.Info("Delaying SIGTERM")
+		time.Sleep(time.Duration(conf.Server.DelaySigterm) * time.Second)
 	}
-	logger.Info(fmt.Sprintf("Stopped listening on %s", conf.Server.Address))
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := e.Shutdown(ctx); err != nil {
+		logger.Fatal(err.Error())
+	}
 }

@@ -29,10 +29,6 @@ spec:
               path: /livez
               port: service-port
             initialDelaySeconds: 15
-          lifecycle:
-            preStop:
-              exec:
-                command: [ "/bin/nap", "5" ]
           resources:
             requests:
               memory: 14Mi

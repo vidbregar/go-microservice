@@ -5,7 +5,6 @@ go 1.17
 require (
 	github.com/brpaz/echozap v1.1.2
 	github.com/deepmap/oapi-codegen v1.7.1
-	github.com/fvbock/endless v0.0.0-20170109170031-447134032cb6
 	github.com/getkin/kin-openapi v0.80.0
 	github.com/go-openapi/swag v0.19.5
 	github.com/go-redis/redis/v8 v8.11.4

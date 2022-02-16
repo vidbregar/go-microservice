@@ -6,6 +6,7 @@ data:
   config.yaml: |
     server:
       address: ":8080"
+      delaySigterm: 5
     logger:
       development: false
     redis:

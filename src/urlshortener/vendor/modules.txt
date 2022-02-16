@@ -15,9 +15,6 @@ github.com/dgryski/go-rendezvous
 # github.com/fsnotify/fsnotify v1.5.1
 ## explicit; go 1.13
 github.com/fsnotify/fsnotify
-# github.com/fvbock/endless v0.0.0-20170109170031-447134032cb6
-## explicit
-github.com/fvbock/endless
 # github.com/getkin/kin-openapi v0.80.0
 ## explicit; go 1.14
 github.com/getkin/kin-openapi/jsoninfo
