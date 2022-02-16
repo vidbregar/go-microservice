@@ -52,3 +52,22 @@ Wait for the deployment to complete
 curl localhost:8080/v1/version
 curl -X POST -H "Content-Type: application/json" -d '{"url":"https://kubernetes.io/docs/concepts/overview/what-is-kubernetes/"}' localhost:8080/v1/url
 ```
+
+## Alternative container image building
+
+Requirements
+
+- [ko](https://github.com/google/ko)
+
+Build and push
+``` bash
+cd src/urlshortener &&
+KO_DOCKER_REPO=k3d-registry.localhost:50000 \
+PROJECT=github.com/vidbregar/go-microservice \
+GIT_TAG=$(git tag --points-at HEAD 2>/dev/null) \
+REVISION=$(git rev-parse --short HEAD 2>/dev/null) \
+ko publish ./cmd/urlshortener/ &&
+cd -
+```
+
+Then update deployment's `image:` and add `command: [ "/ko-app/urlshortener", "-config", "/etc/app/config.yaml", "-secrets", "/etc/app/secrets/" ]` 

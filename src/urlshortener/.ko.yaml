@@ -1,0 +1,8 @@
+builds:
+  - id: urlshortener
+    main: ./cmd/urlshortener/
+    ldflags:
+      - -s
+      - -w
+      - -X {{.Env.PROJECT}}/internal/version.GitTag={{.Env.GIT_TAG}}
+      - -X {{.Env.PROJECT}}/internal/version.Revision={{.Env.REVISION}}"
