@@ -19,7 +19,7 @@ import (
 	"github.com/vidbregar/go-microservice/internal/config"
 	"github.com/vidbregar/go-microservice/internal/db/redis"
 	"github.com/vidbregar/go-microservice/internal/db/redis/urlshortener"
-	loggerpkg "github.com/vidbregar/go-microservice/internal/logger"
+	loggerpkg "github.com/vidbregar/go-microservice/pkg/logger"
 	"github.com/vidbregar/go-microservice/pkg/shortpath"
 )
 
