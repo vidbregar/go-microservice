@@ -1,0 +1,112 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "urlshortener.fullname" . }}
+  annotations:
+    checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+    checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+    {{- range $key, $value := .Values.annotations }}
+    {{ $key }}: {{ $value }}
+  {{- end }}
+  labels:
+  {{- include "urlshortener.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+  {{- include "urlshortener.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+    {{- include "urlshortener.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "urlshortener.serviceAccountName" . }}
+      securityContext:
+      {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+          {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.command }}
+          command: {{ .Values.command }}
+          {{- end }}
+          {{- if .Values.args }}
+          args: {{ .Values.args }}
+          {{- end }}
+          ports:
+            {{- range .Values.service.ports }}
+            - name: {{ .name }}
+              containerPort: {{ .targetPort | default .port }}
+              protocol: {{ .protocol | default "TCP" }}
+          {{- end }}
+          {{- if .Values.env }}
+          env:
+            {{- range $key, $value := .Values.env}}
+            - name: {{ $key | quote}}
+              value: {{ $value | quote }}
+          {{- end }}
+          {{- end }}
+          {{- if .Values.readiness.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.readiness.path }}
+              port: {{ .Values.readiness.port }}
+            initialDelaySeconds: {{ .Values.readiness.initialDelaySeconds  | default 0 }}
+            periodSeconds: {{ .Values.readiness.periodSeconds | default 10 }}
+            timeoutSeconds: {{ .Values.readiness.timeoutSeconds  | default 3 }}
+          {{- end }}
+          {{- if .Values.liveness.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.liveness.path }}
+              port: {{ .Values.liveness.port }}
+            initialDelaySeconds: {{ .Values.liveness.initialDelaySeconds  | default 0 }}
+            periodSeconds: {{ .Values.liveness.periodSeconds | default 10 }}
+            timeoutSeconds: {{ .Values.readiness.timeoutSeconds | default 1 }}
+          {{- end }}
+          resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: {{  .Values.config.mountPath }}
+              readOnly: true
+      volumes:
+        - name: config
+          projected:
+            sources:
+              - secret:
+                  name: {{ include "urlshortener.fullname" . }}
+                  items:
+                    {{- range .Values.config.secrets }}
+                    - key: {{ .key }}
+                      path: {{ .subPath }}
+              {{- end }}
+              - configMap:
+                  name: {{ include "urlshortener.fullname" . }}
+                  items:
+                    - key: {{ .Values.config.configMap.key }}
+                      path: {{ .Values.config.configMap.subPath }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+  {{- toYaml . | nindent 8 }}
+  {{- end }}

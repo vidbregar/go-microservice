@@ -1,5 +1,6 @@
 REVISION ?= $(shell git rev-parse --short HEAD 2>/dev/null)
 GIT_TAG ?= $(shell git tag --points-at HEAD 2>/dev/null)
+IMAGE_TAG ?= latest
 
 .DEFAULT_GOAL := help
 .PHONY: help
@@ -19,10 +20,10 @@ run: ## Start urlshortener in Docker
 
 .PHONY: build
 build: ## Builds urlshortener image
-	docker image rm k3d-registry.localhost:50000/urlshortener:latest || true
+	docker image rm k3d-registry.localhost:50000/urlshortener:$(IMAGE_TAG) || true
 	docker build --build-arg REVISION=$(REVISION) \
 				 --build-arg GIT_TAG=$(GIT_TAG) \
-				 -t k3d-registry.localhost:50000/urlshortener:latest .
+				 -t k3d-registry.localhost:50000/urlshortener:$(IMAGE_TAG) .
 .PHONY: push
 push: ## Pushes urlshortener image to k3d registry
-	docker push k3d-registry.localhost:50000/urlshortener:latest
+	docker push k3d-registry.localhost:50000/urlshortener:$(IMAGE_TAG)

@@ -28,14 +28,27 @@ Requirements
 - [Kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl)
 - [K3d](https://k3d.io/v5.2.2/#installation)
 
-Deploy
+Create a cluster
 
 ``` bash
 grep k3d-registry.localhost /etc/hosts || echo "127.0.0.1 k3d-registry.localhost" | sudo tee -a /etc/hosts
 k3d cluster create --config deploy/k8s/k3d.yaml
 make -C src/urlshortener/ build
 make -C src/urlshortener/ push
+```
+
+Deploy using kubectl
+
+``` bash
 kubectl apply -f deploy/k8s/specs/ --recursive
+```
+
+`or`
+
+Deploy using [Helm](https://helm.sh/docs/intro/install/)
+
+``` bash
+helm install urlshortener deploy/k8s/charts/urlshortener
 ```
 
 Clean up
@@ -60,6 +73,7 @@ Requirements
 - [ko](https://github.com/google/ko)
 
 Build and push
+
 ``` bash
 cd src/urlshortener &&
 KO_DOCKER_REPO=k3d-registry.localhost:50000 \
@@ -70,4 +84,5 @@ ko publish ./cmd/urlshortener/ &&
 cd -
 ```
 
-Then update deployment's `image:` and add `command: [ "/ko-app/urlshortener", "-config", "/etc/app/config.yaml", "-secrets", "/etc/app/secrets/" ]` 
+Then update deployment's `image:` and
+add `command: [ "/ko-app/urlshortener", "-config", "/etc/app/config.yaml", "-secrets", "/etc/app/secrets/" ]` 
